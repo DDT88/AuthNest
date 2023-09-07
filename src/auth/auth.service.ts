@@ -6,12 +6,16 @@ import {
 import { UsersService } from '../users/users.service';
 import { randomBytes, scrypt as _scrypt } from 'crypto';
 import { promisify } from 'util';
+import { JwtService } from '@nestjs/jwt';
 
 const scrypt = promisify(_scrypt);
 
 @Injectable()
 export class AuthService {
-  constructor(private usersService: UsersService) {}
+  constructor(
+    private usersService: UsersService,
+    private jwtService: JwtService,
+  ) {}
 
   async signup(email: string, password: string) {
     // See if email is in use
@@ -50,7 +54,10 @@ export class AuthService {
     if (storedHash !== hash.toString('hex')) {
       throw new BadRequestException('bad password');
     }
-
-    return user;
+    const payload = { sub: user.id, username: user.email };
+    return {
+      user: user,
+      access_token: await this.jwtService.signAsync(payload),
+    };
   }
 }
