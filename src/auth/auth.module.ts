@@ -6,9 +6,19 @@ import { CurrentUserInterceptor } from './interceptors/current-user.interceptor'
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from 'src/users/user.entity';
 import { UsersModule } from 'src/users/users.module';
+import { JwtModule } from '@nestjs/jwt';
+import { jwtCostants } from './costans';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User]), UsersModule],
+  imports: [
+    TypeOrmModule.forFeature([User]),
+    UsersModule,
+    JwtModule.register({
+      global: true,
+      secret: jwtCostants.secret,
+      signOptions: { expiresIn: '5000s' },
+    }),
+  ],
   controllers: [AuthController],
   providers: [
     AuthService,
